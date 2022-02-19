@@ -24,21 +24,34 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+/**
+ * Lightweight spaceship
+ * https://conwaylife.com/wiki/List_of_common_spaceships
+ */
+fn create_spaceship(cells: &mut Vec<Cell>, width: u32, height: u32, v_offset: u32) -> () {
+    for row in 0..height {
+        for col in 0..width {
+            let idx: usize = (row * width + col) as usize;
+            let spaceship_cell = match (row - v_offset, col) {
+                (0, 0) | (1, 0) | (2, 0) | (3, 1) | (0, 1) | (0, 2) | (0, 3) | (1, 4) | (3, 4) => {
+                    Cell::Alive
+                }
+                (_, _) => cells[idx],
+            };
+            cells[idx] = spaceship_cell;
+        }
+    }
+}
+
 #[wasm_bindgen] // it gets exposed to JS
 impl Universe {
     pub fn new() -> Universe {
-        let width = 64;
-        let height = 64;
-
-        let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
+        let width: u32 = 64;
+        let height: u32 = 64;
+        let mut cells: Vec<Cell> = (0..width * height).map(|_i| Cell::Dead).collect();
+        create_spaceship(&mut cells, width, height, height / 2);
+        create_spaceship(&mut cells, width, height, 4);
+        create_spaceship(&mut cells, width, height, height - 4);
 
         Universe {
             width,
