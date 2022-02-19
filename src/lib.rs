@@ -43,15 +43,34 @@ fn create_spaceship(cells: &mut Vec<Cell>, width: u32, height: u32, v_offset: u3
     }
 }
 
+fn get_random_u8() -> u8 {
+    let mut rand = [0];
+    let res = match getrandom::getrandom(&mut rand) {
+        Ok(()) => rand,
+        _ => [1],
+    };
+    res[0]
+}
+
 #[wasm_bindgen] // it gets exposed to JS
 impl Universe {
     pub fn new() -> Universe {
         let width: u32 = 64;
         let height: u32 = 64;
-        let mut cells: Vec<Cell> = (0..width * height).map(|_i| Cell::Dead).collect();
-        create_spaceship(&mut cells, width, height, height / 2);
-        create_spaceship(&mut cells, width, height, 4);
-        create_spaceship(&mut cells, width, height, height - 4);
+
+        let cells: Vec<Cell> = (0..width * height)
+            .map(|_i| {
+                let rand: u8 = get_random_u8();
+                if rand % 2 == 0 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
+        // create_spaceship(&mut cells, width, height, height / 2);
+        // create_spaceship(&mut cells, width, height, 4);
+        // create_spaceship(&mut cells, width, height, height - 4);
 
         Universe {
             width,
