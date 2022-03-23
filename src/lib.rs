@@ -116,6 +116,25 @@ impl Universe {
         self.cells = next;
     }
 
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        self.reset_cells();
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        self.reset_cells();
+    }
+
+    fn reset_cells(&mut self) {
+        for row in 0..self.width {
+            for col in 0..self.height {
+                let idx = self.get_index(row, col);
+                self.cells.set(idx, false);
+            }
+        }
+    }
+
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
@@ -136,6 +155,30 @@ impl Universe {
             }
         }
         count
+    }
+}
+
+impl Universe {
+    pub fn get_cells(&self) -> String {
+        self.to_string()
+    }
+
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for row in 0..self.width {
+            for col in 0..self.height {
+                let idx = self.get_index(row, col);
+                // TODO: Can we move `cell_idx_arr` outside of the loops?
+                let cell_idx_arr = cells
+                    .iter()
+                    .cloned()
+                    .map(|(row, col)| self.get_index(row, col));
+                if cell_idx_arr.into_iter().any(|cell_i| cell_i == idx) {
+                    self.cells.set(idx, true);
+                } else {
+                    self.cells.set(idx, false);
+                }
+            }
+        }
     }
 }
 
